@@ -1,4 +1,4 @@
-baseURL = "/"
+baseURL = "https://riktronics.netlify.app/"
 languageCode = "en"
 title = "Riktronics"
 theme = "color-your-world"
@@ -71,7 +71,7 @@ paginate = 5
   
   # Shows a message in the footer about JavaScript being disabled
   # The default is false
-  hasNoscriptNotice = false
+  hasNoscriptNotice = true
   
   # Default path for images in posts
   # ie.: "content/some-post/img"

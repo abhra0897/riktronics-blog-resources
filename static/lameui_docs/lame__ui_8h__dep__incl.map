@@ -1,0 +1,4 @@
+<map id="lame_ui.h" name="lame_ui.h">
+<area shape="rect" id="node1" title="One and only header file for LameUI library." alt="" coords="5,5,92,32"/>
+<area shape="rect" id="node2" href="$lame__ui_8c.html" title="Source FIle of LameUI GUI library. Must include lame_ui.h. No other file is mandatory." alt="" coords="6,80,91,107"/>
+</map>
