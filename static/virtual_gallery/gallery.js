@@ -52,15 +52,23 @@ document.body.addEventListener( 'mousedown', onMouseDown, false );
 
 // cerate room at x=0, z=0. Dimension: w=10, l=10, h=4.5 meters
 createRoom(0, 0, 10, 20, 4.5);
+
 // Draw some random boxes for fun
 drawBoxesRandom(0);
 
+// Create the frames to display the images
+createExhibits(0, 2, 0, 10, 20, 4);
+
 // Add lights
+createLightGrid(0, 4, 0, 10, 20, 3, 3, 0xffffff, 1, 10);
 let light = new THREE.AmbientLight(0x101010, 2);
 scene.add(light);
 
 
 function createLightGrid(centerX, centerY, centerZ, w, l, wCount, lCount, color, intensity, distance) {
+    const lampR = 0.3;
+    const lampT = 0.2;
+
     let gapW = w / wCount;
     let gapL = l / lCount;
     let startW = centerX - (w / 2) + (gapW / 2);
@@ -71,17 +79,31 @@ function createLightGrid(centerX, centerY, centerZ, w, l, wCount, lCount, color,
 
     for (let iw = 0; iw < wCount; iw++) {
         for (let il = 0; il < lCount; il++) {
-            let lightN = new THREE.PointLight(color, intensity, distance);
-            lightN.position.set(x, y, z);
-            lightN.castShadow = true;
+            const light = new THREE.PointLight(color, intensity, distance);
+            light.position.set(x, y, z);
+            light.castShadow = true;
+//             light.target.position.set(x, 0, z);    // for spotlight
+//             scene.add(light.target);   // for spotlight
 
             //Set up shadow properties for the light
-            lightN.shadow.mapSize.width = 512; // default
-            lightN.shadow.mapSize.height = 512; // default
-            lightN.shadow.camera.near = 0.5; // default
-            lightN.shadow.camera.far = 500; // default
+            light.shadow.mapSize.width = 512; // default
+            light.shadow.mapSize.height = 512; // default
+            light.shadow.camera.near = 0.5; // default
+            light.shadow.camera.far = 500; // default
 
-            groupLight.add(lightN);
+            const geoLamp = new THREE.CylinderGeometry(lampR, lampR, lampT, 32);
+            const matLamp = new THREE.MeshBasicMaterial({color: color});
+            const lamp = new THREE.Mesh(geoLamp, matLamp);
+            lamp.position.set(x, y+.4, z);
+
+            const geoLampOuter = new THREE.CylinderGeometry(lampR+0.02, lampR+0.02, lampT/2, 32);
+            const matLampOuter = new THREE.MeshBasicMaterial({color: 0x808080});
+            const lampOuter = new THREE.Mesh(geoLampOuter, matLampOuter);
+            lampOuter.position.set(x, y+.4, z);
+
+            groupLight.add(light);
+            groupLight.add(lamp);
+            groupLight.add(lampOuter);
             z = z + gapL;
         }
         x = x + gapW;
@@ -92,7 +114,6 @@ function createLightGrid(centerX, centerY, centerZ, w, l, wCount, lCount, color,
     return groupLight;
 }
 
-createLightGrid(0, 4, 0, 10, 20, 3, 3, 0xff1280, 1, 10);
 
 
 //Is camera reached the maximum Z position?
@@ -137,8 +158,41 @@ function drawBoxesRandom(box_cnt) {
 
 }
 
-function spawnExhibits() {
 
+function createExhibits(centerX, centerY, centerZ, w, l, count) {
+    const frameW = 1.4;
+    const frameH = 1.8;
+    const frameT = 0.5;
+
+    let gapW = w;
+    let gapL = l / count;
+    let startW = centerX - (w / 2);
+    let startL = centerZ - (l / 2) + (gapL / 2);
+    let x = startW, y = centerY, z = startL;
+
+    const groupObjs = new THREE.Group();
+
+    for (let iw = 0; iw < 2; iw++) {
+        for (let il = 0; il < count; il++) {
+            const geoFrame = new THREE.BoxGeometry(frameW, frameH, frameT);
+            const matFrame = new THREE.MeshStandardMaterial({
+                color: 0xffffff,
+                roughness: 0.5
+            });
+            const frame = new THREE.Mesh(geoFrame, matFrame);
+            frame.position.set(x, y, z);
+            frame.castShadow = true;
+            frame.rotation.y = Math.PI / 2;
+
+            groupObjs.add(frame);
+            z = z + gapL;
+        }
+        x = x + gapW;
+        z = startL;
+    }
+
+    scene.add(groupObjs);
+    return groupObjs;
 }
 
 function createRoom(posX, posZ, width, length, height) {
