@@ -4,11 +4,23 @@
 <head>
     <title>Virtual Gallery</title>
     <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-    <style></style>
+    <style>
+        body {
+            overflow: hidden;
+            margin: 0;
+        }
+        .ui {
+            position: absolute;
+        }
+    </style>
 </head>
 
 <body>
-    <p>[Start: Left click] [Move: W/A/S/D] [End: Esc/Right click]</p>
+    <div style="width:100%;height:50px;text-align: center; color:white;" class="ui">[Start: Left click] [End: Esc/Right click]</div>
+        <div style="top:0; color: white; background-color: #00000080; padding: .5em; border-radius: .5em; border: 2px solid grey;" id="fire" class="ui">
+            Move: W/A/S/D
+        </div>
+    </div>
     <script async src="https://unpkg.com/es-module-shims@1.6.2/dist/es-module-shims.js"></script>
     <script type="importmap">
     {
