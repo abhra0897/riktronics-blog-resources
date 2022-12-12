@@ -27,8 +27,8 @@ const far = 1000.0;
 const aspect = window.innerWidth / window.innerHeight;
 // camera = new THREE.PerspectiveCamera(65, aspect, 0.1, 2000);
 camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
-camera.position.set(0, 1.6, 0);
-camera.lookAt(new THREE.Vector3(0, 0, 0));
+camera.position.set(0, 1.6, -13);
+camera.lookAt(new THREE.Vector3(0, 1.6, 0));
 
 // Create WebGL Renderer
 renderer = new THREE.WebGLRenderer({
@@ -51,23 +51,41 @@ document.body.addEventListener('keyup', onKeyUp, false);
 document.body.addEventListener( 'mousedown', onMouseDown, false );
 
 // cerate room at x=0, z=0. Dimension: w=10, l=10, h=4.5 meters
-createRoom(0, 0, 10, 20, 4.5);
+createRoom(0, 0, 6, 30, 4.5);
 
 // Draw some random boxes for fun
-drawBoxesRandom(0);
+// drawBoxesRandom(0);
 
 // Create the frames to display the images
-createExhibits(0, 2, 0, 10, 20, 4);
+const images = new Array()
+images[0] = 'images/pexels-trace-hudson-2775541.jpg';
+images[1] = 'images/pexels-sven-huls-3801347.jpg';
+images[2] = 'images/pexels-josh-hild-2422265.jpg';
+images[3] = 'images/pexels-arın-turkay-2591408.jpg';
+images[4] = 'images/pexels-eberhard-grossgasteiger-701353.jpg';
+images[5] = 'images/pexels-oliver-sjöström-1020016.jpg';
+images[6] = 'images/pexels-pixabay-326231.jpg';
+images[7] = 'images/pexels-kaique-rocha-775200.jpg';
+images[8] = 'images/pexels-artem-saranin-1547813.jpg';
+images[9] = 'images/pexels-kaique-rocha-775201.jpg';
+images[10] = 'images/pexels-trace-hudson-2365457.jpg';
+images[11] = 'images/pexels-rok-romih-3848197.jpg';
+images[12] = 'images/pexels-david-pinheiro-4768936.jpg';
+images[13] = 'images/pexels-senuscape-1658967.jpg';
+images[14] = 'images/pexels-oleksandr-pidvalnyi-1172064.jpg';
+images[15] = 'images/forest_hill_1.jpg';
+
+createExhibits(0, 1.8, 0, 6, 30, 8, images);
 
 // Add lights
-createLightGrid(0, 4, 0, 10, 20, 3, 3, 0xffffff, 1, 10);
-let light = new THREE.AmbientLight(0x101010, 2);
+createLightGrid(0, 4, 0, 6, 30, 2, 4, 0xffffff, 0.6, 10);
+let light = new THREE.AmbientLight(0x101010, 1.2);
 scene.add(light);
 
 
 function createLightGrid(centerX, centerY, centerZ, w, l, wCount, lCount, color, intensity, distance) {
     const lampR = 0.3;
-    const lampT = 0.2;
+    const lampT = 0.1;
 
     let gapW = w / wCount;
     let gapL = l / lCount;
@@ -97,7 +115,7 @@ function createLightGrid(centerX, centerY, centerZ, w, l, wCount, lCount, color,
             lamp.position.set(x, y+.4, z);
 
             const geoLampOuter = new THREE.CylinderGeometry(lampR+0.02, lampR+0.02, lampT/2, 32);
-            const matLampOuter = new THREE.MeshBasicMaterial({color: 0x808080});
+            const matLampOuter = new THREE.MeshStandardMaterial({color: 0x808080});
             const lampOuter = new THREE.Mesh(geoLampOuter, matLampOuter);
             lampOuter.position.set(x, y+.4, z);
 
@@ -159,34 +177,67 @@ function drawBoxesRandom(box_cnt) {
 }
 
 
-function createExhibits(centerX, centerY, centerZ, w, l, count) {
-    const frameW = 1.4;
-    const frameH = 1.8;
-    const frameT = 0.5;
+function createExhibits(centerX, centerY, centerZ, w, l, count, images) {
+    const frameW = 1.2;
+    const frameH = 1.6;
+    const frameT = 0.2;
 
     let gapW = w;
     let gapL = l / count;
     let startW = centerX - (w / 2);
     let startL = centerZ - (l / 2) + (gapL / 2);
     let x = startW, y = centerY, z = startL;
+    let imageIndex = 0;
 
     const groupObjs = new THREE.Group();
-
+    let flipFrame = false;
+    const frameColor = 0x505050;
+    const maxAnisotropy = renderer.capabilities.getMaxAnisotropy();
     for (let iw = 0; iw < 2; iw++) {
         for (let il = 0; il < count; il++) {
+            const textureFrame = new THREE.TextureLoader().load(images[imageIndex++]);
             const geoFrame = new THREE.BoxGeometry(frameW, frameH, frameT);
-            const matFrame = new THREE.MeshStandardMaterial({
-                color: 0xffffff,
-                roughness: 0.5
-            });
-            const frame = new THREE.Mesh(geoFrame, matFrame);
+//             const matFrame = new THREE.MeshStandardMaterial({
+//                 color: 0xffffff,
+//                 roughness: 0.5
+//             });
+
+            const matFrame2 = [
+                new THREE.MeshStandardMaterial({
+                    color: frameColor //left
+                }),
+                new THREE.MeshStandardMaterial({
+                    color: frameColor //right
+                }),
+                new THREE.MeshBasicMaterial({
+                    color: frameColor // top
+                }),
+                new THREE.MeshBasicMaterial({
+                    color: frameColor // bottom
+                }),
+                new THREE.MeshBasicMaterial({
+                    map: textureFrame, // front
+                    roughness: 0.5,
+                    emissive: 0xffffff,
+                    emissiveIntensity: 0
+                }),
+                new THREE.MeshBasicMaterial({
+                    color: frameColor //back
+                })
+            ];
+            matFrame2[4].map.anisotropy = maxAnisotropy;
+            const frame = new THREE.Mesh(geoFrame, matFrame2);
             frame.position.set(x, y, z);
             frame.castShadow = true;
-            frame.rotation.y = Math.PI / 2;
+            if (flipFrame == false)
+                frame.rotation.y = Math.PI / 2;
+            else
+                frame.rotation.y = 3 * Math.PI / 2;
 
             groupObjs.add(frame);
             z = z + gapL;
         }
+        flipFrame = true;
         x = x + gapW;
         z = startL;
     }
